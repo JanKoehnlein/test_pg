@@ -8,7 +8,7 @@ RUN sudo install-packages postgresql-12 postgresql-contrib-12
 ENV PATH="$PATH:/usr/lib/postgresql/12/bin"
 ENV PGDATA="/workspace/.pgsql/data"
 RUN mkdir -p ~/.pg_ctl/bin ~/.pg_ctl/sockets \
- && printf '#!/bin/bash\nwhile [ ! -d /workspace ]\ndo echo "Waiting for workspace" sleep 1\ndone\n[ ! -d $PGDATA ] && mkdir -p $PGDATA && initdb -D $PGDATA\npg_ctl -D $PGDATA -l ~/.pg_ctl/log -o "-k ~/.pg_ctl/sockets" start\n' > ~/.pg_ctl/bin/pg_start \
+ && printf '#!/bin/bash\nwhile [ -z "$(grep /workspace /proc/mounts)" ] ; do\n  echo "waiting for workspace to be mounted"\n  sleep 1\ndone\n[ ! -d $PGDATA ] && mkdir -p $PGDATA && initdb -D $PGDATA\npg_ctl -D $PGDATA -l ~/.pg_ctl/log -o "-k ~/.pg_ctl/sockets" start\n' > ~/.pg_ctl/bin/pg_start \
  && printf '#!/bin/bash\npg_ctl -D $PGDATA -l ~/.pg_ctl/log -o "-k ~/.pg_ctl/sockets" stop\n' > ~/.pg_ctl/bin/pg_stop \
  && chmod +x ~/.pg_ctl/bin/*
 ENV PATH="$PATH:$HOME/.pg_ctl/bin"
